@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
+import apiService from '../../services/api';
+import type { User } from '../../types';
 
 // Tipe untuk properti yang diterima oleh halaman login/register
 interface AuthPageProps {
-  onLoginSuccess: (data: any) => void;
-  onRegisterSuccess: (data: any) => void;
+  onLoginSuccess: (data: { user: User; access_token: string }) => void;
+  onRegisterSuccess: () => void;
   onSwitchView: (view: 'login' | 'register') => void;
 }
 
 // Komponen Halaman Login
 export const LoginPage: React.FC<Pick<AuthPageProps, 'onLoginSuccess' | 'onSwitchView'>> = ({ onLoginSuccess, onSwitchView }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('customer@example.com');
+  const [password, setPassword] = useState('password123');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,18 +20,18 @@ export const LoginPage: React.FC<Pick<AuthPageProps, 'onLoginSuccess' | 'onSwitc
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    // TODO: Implementasikan pemanggilan API ke endpoint /api/auth/login
-    console.log('Logging in with:', { email, password });
-    // Simulasi pemanggilan API
-    setTimeout(() => {
-        // Ganti ini dengan data asli dari API
-        const mockApiResponse = {
-            access_token: 'fake_jwt_token_for_testing',
-            user: { id: 1, name: 'Test User', email: email, role: 'customer' }
-        };
-        onLoginSuccess(mockApiResponse);
+    
+    try {
+        const data = await apiService<{ user: User; access_token: string }>('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ email, password }),
+        });
+        onLoginSuccess(data);
+    } catch (err: any) {
+        setError(err.error || 'Login gagal. Periksa kembali email dan password Anda.');
+    } finally {
         setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -37,7 +39,7 @@ export const LoginPage: React.FC<Pick<AuthPageProps, 'onLoginSuccess' | 'onSwitc
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
         <form onSubmit={handleSubmit}>
-          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+          {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
               Email
@@ -101,13 +103,31 @@ export const RegisterPage: React.FC<Pick<AuthPageProps, 'onRegisterSuccess' | 'o
     }
     setIsLoading(true);
     setError(null);
-    // TODO: Implementasikan pemanggilan API ke endpoint /api/auth/register
-    console.log('Registering with:', { name, email, password });
-    // Simulasi pemanggilan API
-    setTimeout(() => {
-        onRegisterSuccess({});
+    
+    try {
+        await apiService('/auth/register', {
+            method: 'POST',
+            body: JSON.stringify({
+                name,
+                email,
+                password,
+                password_confirmation: passwordConfirmation,
+            }),
+        });
+        alert('Registrasi berhasil! Silakan login.');
+        onRegisterSuccess();
+    } catch (err: any) {
+        // Menangani error validasi dari Laravel
+        if (err.email || err.password) {
+            const emailErrors = err.email ? err.email.join(' ') : '';
+            const passwordErrors = err.password ? err.password.join(' ') : '';
+            setError(`${emailErrors} ${passwordErrors}`);
+        } else {
+            setError(err.message || 'Registrasi gagal. Silakan coba lagi.');
+        }
+    } finally {
         setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -115,7 +135,7 @@ export const RegisterPage: React.FC<Pick<AuthPageProps, 'onRegisterSuccess' | 'o
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Register</h2>
         <form onSubmit={handleSubmit}>
-          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+          {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
            <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
               Nama Lengkap

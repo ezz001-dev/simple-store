@@ -5,6 +5,7 @@ import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { CartSidebar } from './components/cart/CartSidebar';
 import type { Product, CartItem , User } from './types';
 import { LoginPage, RegisterPage } from './pages/auth/AuthPages';
+import apiService from './services/api';
 
 export default function App() {
    // State untuk menyimpan data user dan token
@@ -65,11 +66,20 @@ export default function App() {
   };
 
    // Handler untuk logout
-  const handleLogout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+  const handleLogout = async () => {
+    try {
+        await apiService('/auth/logout', {
+            method: 'POST',
+        });
+    } catch (error) {
+        console.error('Logout failed, but logging out client-side anyway:', error);
+    } finally {
+        // Selalu hapus data dari client-side, bahkan jika API gagal
+        setUser(null);
+        setToken(null);
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+    }
   };
 
 
