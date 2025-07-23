@@ -45,3 +45,11 @@ export interface StockData {
     name: string;
     stock: number;
 }
+
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: 'admin' | 'customer';
+}

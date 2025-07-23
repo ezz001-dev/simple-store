@@ -3,10 +3,18 @@ import React, { useState } from 'react';
 import { CustomerView } from './pages/customer/CustomerView';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { CartSidebar } from './components/cart/CartSidebar';
-import type { Product, CartItem } from './types';
+import type { Product, CartItem , User } from './types';
+import { LoginPage, RegisterPage } from './pages/auth/AuthPages';
 
 export default function App() {
-  const [view, setView] = useState<'customer' | 'admin'>('customer');
+   // State untuk menyimpan data user dan token
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+
+
+    // State untuk mengontrol tampilan antara login dan register
+  const [authView, setAuthView] = useState<'login' | 'register'>('login');
+
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showCheckoutMessage, setShowCheckoutMessage] = useState(false);
@@ -41,40 +49,61 @@ export default function App() {
     }
   };
 
+
+  // Handler setelah registrasi berhasil
+  const handleRegisterSuccess = () => {
+    // Arahkan ke halaman login setelah registrasi berhasil
+    setAuthView('login');
+  };
+
+   // Handler setelah login berhasil
+  const handleLoginSuccess = (data: { user: User; access_token: string }) => {
+    setUser(data.user);
+    setToken(data.access_token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.setItem('token', data.access_token);
+  };
+
+   // Handler untuk logout
+  const handleLogout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+  };
+
+
+  if (!user || !token) {
+    return authView === 'login' ? (
+      <LoginPage onLoginSuccess={handleLoginSuccess} onSwitchView={setAuthView} />
+    ) : (
+      <RegisterPage onRegisterSuccess={handleRegisterSuccess} onSwitchView={setAuthView} />
+    );
+  }
+
   return (
     <div>
-      {/* Komponen untuk mengganti tampilan */}
-      <div className="fixed bottom-4 right-4 z-50 bg-blue-600 text-white p-3 rounded-full shadow-lg">
-        <p className="text-sm mb-2 text-center">Ganti Tampilan</p>
-        <div className="flex space-x-2">
-            <button onClick={() => setView('customer')} className={`px-4 py-2 rounded-md text-sm ${view === 'customer' ? 'bg-white text-blue-600' : 'bg-blue-500'}`}>Customer</button>
-            <button onClick={() => setView('admin')} className={`px-4 py-2 rounded-md text-sm ${view === 'admin' ? 'bg-white text-blue-600' : 'bg-blue-500'}`}>Admin</button>
-        </div>
-      </div>
-      
-      {showCheckoutMessage && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
-            Checkout berhasil! (Simulasi)
-        </div>
-      )}
+      <button onClick={handleLogout} className="fixed bottom-4 right-4 z-50 bg-red-500 text-white p-3 rounded-full shadow-lg">
+        Logout
+      </button>
 
-      {view === 'customer' ? (
-         <>
+      {user.role === 'admin' ? (
+        <AdminDashboard />
+      ) : (
+        <>
           <CustomerView 
             cartItems={cartItems}
             onAddToCart={handleAddToCart} 
             onToggleCart={handleToggleCart}
           />
-          {isCartOpen &&  <CartSidebar 
+          <CartSidebar 
             isOpen={isCartOpen}
             cartItems={cartItems} 
             onRemoveItem={handleRemoveFromCart} 
             onClose={handleToggleCart} 
             onCheckout={handleCheckout} 
-          />}
+          />
         </>
-      ) : (
-        <AdminDashboard />
       )}
     </div>
   );
