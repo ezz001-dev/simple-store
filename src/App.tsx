@@ -59,9 +59,19 @@ export default function App() {
       )}
 
       {view === 'customer' ? (
-        <>
-          <CustomerView onAddToCart={handleAddToCart} />
-          {isCartOpen && <CartSidebar cartItems={cartItems} onRemoveItem={handleRemoveFromCart} onClose={handleToggleCart} onCheckout={handleCheckout} />}
+         <>
+          <CustomerView 
+            cartItems={cartItems}
+            onAddToCart={handleAddToCart} 
+            onToggleCart={handleToggleCart}
+          />
+          {isCartOpen &&  <CartSidebar 
+            isOpen={isCartOpen}
+            cartItems={cartItems} 
+            onRemoveItem={handleRemoveFromCart} 
+            onClose={handleToggleCart} 
+            onCheckout={handleCheckout} 
+          />}
         </>
       ) : (
         <AdminDashboard />
