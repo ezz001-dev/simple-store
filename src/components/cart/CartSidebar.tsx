@@ -32,10 +32,10 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, cartItems, onR
               cartItems.map(item => (
                 <div key={item.id} className="flex items-center justify-between mb-4">
                   <div className="flex items-center">
-                    <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-md mr-4" />
+                    <img src={item?.image_url || `https://placehold.co/300x300/e2e8f0/333?text=${encodeURIComponent(item.name)}`} alt={item.name} className="w-16 h-16 object-cover rounded-md mr-4" />
                     <div>
                       <h3 className="font-semibold">{item.name}</h3>
-                      <p className="text-gray-600">Rp. {item.price.toLocaleString('id-ID')}</p>
+                      <p className="text-gray-600">Rp. {Number(item.price).toLocaleString('id-ID')}</p>
                        <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                     </div>
                   </div>

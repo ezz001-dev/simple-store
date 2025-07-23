@@ -16,7 +16,7 @@ export default function App() {
     // State untuk mengontrol tampilan antara login dan register
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
 
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[] | any[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showCheckoutMessage, setShowCheckoutMessage] = useState(false);
 

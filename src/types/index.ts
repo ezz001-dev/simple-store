@@ -7,9 +7,20 @@ import React from 'react';
 export interface Product {
   id: number;
   name: string;
-  price: number;
-  image: string;
-  category: string;
+  description: string | null;
+  price: string | number;
+  stock: number;
+  image_url: string | null;
+  category?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaginatedResponse<T> {
+    data: T[];
+    current_page: number;
+    last_page: number;
+    total: number;
 }
 
 /**
@@ -27,6 +38,7 @@ export interface Category {
  */
 export interface CartItem extends Product {
   quantity: number;
+  price : number;
 }
 
 /**

@@ -1,16 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
 import { SearchIcon } from '../../assets/icons/SearchIcon';
 import { UserIcon } from '../../assets/icons/UserIcon';
 import type { CartItem } from '../../types';
 
+
 interface HeaderProps {
   cartItems: CartItem[];
   onToggleCart: () => void;
+  onSearch: (query: string) => void; // Prop baru untuk menangani pencarian
 }
 
-export const Header: React.FC<HeaderProps> = ({ cartItems, onToggleCart }) => {
+export const Header: React.FC<HeaderProps> = ({ cartItems, onToggleCart, onSearch }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const cartTotalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+
+  // Efek untuk debouncing: hanya panggil onSearch setelah pengguna berhenti mengetik
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      onSearch(searchTerm);
+    }, 500); // Tunggu 500ms setelah ketikan terakhir
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm, onSearch]);
 
   return (
     <header className="bg-white border-b border-gray-200">
@@ -55,3 +67,4 @@ export const Header: React.FC<HeaderProps> = ({ cartItems, onToggleCart }) => {
     </header>
   );
 };
+

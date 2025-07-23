@@ -1,11 +1,10 @@
-// src/pages/customer/CustomerView.tsx
-import React, { useState, useMemo } from 'react';
-import { initialProducts, categories } from '../../data/mockData';
-import type { Product, CartItem , Category } from '../../types';
-
+import React, { useState, useEffect, useCallback } from 'react';
 import { ProductCard } from '../../components/product/ProductCard';
 import { Header } from '../../components/common/Header';
 import { Footer } from '../../components/common/Footer';
+import { categories } from '../../data/mockData'; // Kategori masih pakai data tiruan untuk UI
+import type { Product, CartItem, Category, PaginatedResponse } from '../../types';
+import apiService from '../../services/api';
 
 interface CustomerViewProps {
     cartItems: CartItem[];
@@ -14,18 +13,43 @@ interface CustomerViewProps {
 }
 
 export const CustomerView: React.FC<CustomerViewProps> = ({ cartItems, onAddToCart, onToggleCart }) => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState('ALL');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredProducts = useMemo(() => {
-    return initialProducts
-      .filter(p => activeFilter === 'ALL' || p.category === activeFilter)
-      .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
-  }, [activeFilter, searchTerm]);
+  const fetchProducts = useCallback(async (query: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const endpoint = query ? `/products?search=${query}` : '/products';
+      const response = await apiService<PaginatedResponse<Product>>(endpoint);
+      setProducts(response.data);
+    } catch (err) {
+      setError('Gagal memuat produk. Silakan coba lagi nanti.');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+    useEffect(() => {
+    fetchProducts(searchQuery);
+  }, [searchQuery, fetchProducts]);
+
+  // Filter masih di client-side, bisa dioptimalkan dengan memanggil API
+  const filteredProducts = activeFilter === 'ALL'
+    ? products
+    : products.filter(p => p.category === activeFilter);
 
   return (
-   <div className="bg-white min-h-screen font-sans">
-      <Header cartItems={cartItems} onToggleCart={onToggleCart} />
+    <div className="bg-white min-h-screen font-sans">
+      <Header 
+        cartItems={cartItems} 
+        onToggleCart={onToggleCart} 
+        onSearch={setSearchQuery} // Teruskan fungsi untuk update query
+      />
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <section className="mb-12">
@@ -51,11 +75,21 @@ export const CustomerView: React.FC<CustomerViewProps> = ({ cartItems, onAddToCa
               <button onClick={() => setActiveFilter('JUICES')} className={`px-4 py-1 rounded-full text-sm font-semibold ${activeFilter === 'JUICES' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`}>JUICES</button>
             </div>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {filteredProducts.map(product => (
-              <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} />
-            ))}
-          </div>
+          
+          {isLoading && <div className="text-center col-span-full py-10">Memuat produk...</div>}
+          {error && <div className="text-center col-span-full py-10 text-red-500">{error}</div>}
+          
+          {!isLoading && !error && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              {filteredProducts.length > 0 ? (
+                 filteredProducts.map(product => (
+                  <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} />
+                ))
+              ) : (
+                <p className="col-span-full text-center py-10">Tidak ada produk yang ditemukan.</p>
+              )}
+            </div>
+          )}
         </section>
       </main>
 
