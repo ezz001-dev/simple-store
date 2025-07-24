@@ -76,6 +76,7 @@ export interface OrderDetail {
     product: {
         id: number;
         name: string;
+        image_url?:string
     }
 }
 
