@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { ProductManagementPage } from './ProductManagementPage';
-import { TransactionPage } from './TransactionPage'; // Impor halaman baru
+import { TransactionPage } from './TransactionPage';
 import apiService from '../../services/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { LoadingSpinner, ErrorMessage } from '../../components/ui/FeedbackComponents';
-import { LayoutDashboard, Package, ShoppingCart, Menu, Search, Bell, UserCircle, LogOut, Wallet, Archive, TrendingUp, ThumbsUp } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Menu, Search, Bell, UserCircle, LogOut, Wallet, Archive, TrendingUp, ThumbsUp, ArrowUpRight } from 'lucide-react';
 
+// Tipe data untuk statistik dasbor
 interface DashboardStats {
     summary: {
         total_revenue: string;
         total_stock: number;
         items_sold: number;
         category_count: number;
+        daily_revenue: string; 
+        daily_transactions: number;
+        out_of_stock : number 
     };
     monthly_sales: { month: string; total: number }[];
-    best_sellers: { name: string; quantity: number }[];
+    best_sellers: { name: string; quantity: number | string }[];
     stock_levels: { name: string; stock: number }[];
 }
 
@@ -29,7 +33,23 @@ const DashboardView: React.FC = () => {
             setIsLoading(true);
             try {
                 const data = await apiService<DashboardStats>('/dashboard/stats');
-                setStats(data);
+                
+                // Gabungkan data API dengan data dummy
+                const monthlySalesWithDummy = [
+                    { month: 'Mei', total: 25000000 },
+                    { month: 'Jun', total: 21000000 },
+                    ...data.monthly_sales,
+                ];
+
+                const processedData = {
+                    ...data,
+                    monthly_sales: monthlySalesWithDummy,
+                    best_sellers: data.best_sellers.map(item => ({
+                        ...item,
+                        quantity: Number(item.quantity)
+                    }))
+                };
+                setStats(processedData);
             } catch (err) {
                 setError('Gagal memuat statistik dasbor.');
             } finally {
@@ -54,7 +74,7 @@ const DashboardView: React.FC = () => {
 
     return (
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-            {/* Kartu Ringkasan Dinamis dengan Ikon Lucide */}
+            {/* Card Summary */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 {summaryCards.map((card, index) => (
                     <div key={index} className={`p-6 rounded-lg shadow-sm flex justify-between items-center ${card.bgColor}`}>
@@ -69,23 +89,61 @@ const DashboardView: React.FC = () => {
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Penjualan per Bulan */}
-                <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
-                    <h3 className="font-semibold mb-4">Penjualan per Bulan</h3>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={stats.monthly_sales} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="month" />
-                            <YAxis tickFormatter={(value) => new Intl.NumberFormat('id-ID', { notation: 'compact' }).format(value as number)} />
-                            <Tooltip formatter={(value) => `Rp ${Number(value).toLocaleString('id-ID')}`} />
-                            <Line type="monotone" dataKey="total" stroke="#8884d8" activeDot={{ r: 8 }} />
-                        </LineChart>
-                    </ResponsiveContainer>
+                <div className='lg:col-span-2 flex flex-col gap-4'>
+
+                    <div className='lg:col-span-2 rounded-lg shadow-sm overflow-hidden'>
+                        <div className=" bg-blue-600 text-white p-6 ">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="font-semibold">Penjualan per Bulan</h3>
+                                <div className="flex items-center text-sm">
+                                    <ArrowUpRight size={16} className="mr-1" /> 3%
+                                </div>
+                            </div>
+                            <ResponsiveContainer width="100%" height={200}>
+                                <LineChart data={stats.monthly_sales} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
+                                    {/* <XAxis dataKey="month" stroke="rgba(255, 255, 255, 0.7)" />
+                                    <YAxis stroke="rgba(255, 255, 255, 0.7)" tickFormatter={(value) => new Intl.NumberFormat('id-ID', { notation: 'compact' }).format(value as number)} /> */}
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.7)', border: 'none' }}
+                                        labelStyle={{ color: '#fff' }}
+                                        formatter={(value) => [`Rp ${Number(value).toLocaleString('id-ID')}`, 'Total']}
+                                    />
+                                    <Line type="monotone" dataKey="total" stroke="#fff" strokeWidth={2} activeDot={{ r: 8 }} />
+                                </LineChart>
+                            </ResponsiveContainer>
+                            
+                        </div>
+
+                        <div className="flex justify-between items-center mt-4 p-4">
+                                <div className="text-center">
+                                    <p className="text-2xl font-bold">Rp {Number(stats.summary.daily_revenue || 0).toLocaleString('id-ID')}</p>
+                                    <p className="text-sm font-bold text-gray-700">Total Pendapatan Hari Ini</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-2xl font-bold">{stats.summary.daily_transactions || 0}</p>
+                                    <p className="text-sm font-bold text-gray-700">Transaksi</p>
+                                </div>
+                        </div>
+
+                    </div>
+                {/* Stok Habis & Barang Terjual */}
+                    <div className="bg-white p-6 rounded-lg shadow-sm flex justify-around items-center">
+                        <div className="text-center">
+                            <p className="text-gray-500">Stok Habis</p>
+                            <p className="text-2xl font-bold text-red-500">{stats.summary.out_of_stock}</p>
+                        </div>
+                        <div className="h-12 border-l border-gray-200"></div>
+                        <div className="text-center">
+                            <p className="text-gray-500">Barang Terjual</p>
+                            <p className="text-2xl font-bold text-green-500">{stats.summary.items_sold}</p>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Best Seller */}
                 <div className="bg-white p-6 rounded-lg shadow-sm">
                     <h3 className="font-semibold mb-4">Best Seller</h3>
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ResponsiveContainer width="100%" height={400}>
                         <PieChart>
                             <Pie data={stats.best_sellers} dataKey="quantity" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" label>
                                 {stats.best_sellers.map((entry, index) => (
@@ -126,7 +184,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     return (
         <div className="flex h-screen bg-gray-100 font-sans">
             <div
-                className={`fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                className={`fixed inset-0 bg-black/50 bg-opacity-50 z-20 lg:hidden transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                 onClick={() => setIsSidebarOpen(false)}
             ></div>
 
