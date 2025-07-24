@@ -8,7 +8,7 @@ export interface Product {
   id: number;
   name: string;
   description: string | null;
-  price: string | number;
+  price: string | any;
   stock: number;
   image_url: string | null;
   category?: string;
