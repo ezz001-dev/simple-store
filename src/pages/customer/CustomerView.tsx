@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ProductCard } from '../../components/product/ProductCard';
 import { Header } from '../../components/common/Header';
 import { Footer } from '../../components/common/Footer';
-import type { Product, CartItem, Category, PaginatedResponse } from '../../types';
+import type { Product, CartItem, Category, PaginatedResponse, User } from '../../types';
 import apiService from '../../services/api';
 import { LoadingSpinner, ErrorMessage } from '../../components/ui/FeedbackComponents';
 import { LeafIcon, BreadIcon, JuiceIcon, PepperIcon, BagIcon } from '../../assets/icons/index';
@@ -20,11 +20,13 @@ const staticCategories: Category[] = [
 
 interface CustomerViewProps {
     cartItems: CartItem[];
+    user : User;
     onAddToCart: (product: Product, quantity: number) => void;
     onToggleCart: () => void;
+    onLogout: () => void;
 }
 
-export const CustomerView: React.FC<CustomerViewProps> = ({ cartItems, onAddToCart, onToggleCart }) => {
+export const CustomerView: React.FC<CustomerViewProps> = ({ cartItems, onAddToCart, onToggleCart, onLogout , user }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,9 +57,11 @@ export const CustomerView: React.FC<CustomerViewProps> = ({ cartItems, onAddToCa
   return (
     <div className="bg-white min-h-screen font-sans">
       <Header 
+        user={user}
         cartItems={cartItems} 
         onToggleCart={onToggleCart} 
         onSearch={setSearchQuery}
+        onLogout={onLogout} 
       />
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">

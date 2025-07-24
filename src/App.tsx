@@ -1,25 +1,63 @@
-// src/App.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CustomerView } from './pages/customer/CustomerView';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
-import { CartSidebar } from './components/cart/CartSidebar';
-import type { Product, CartItem , User } from './types';
 import { LoginPage, RegisterPage } from './pages/auth/AuthPages';
+import { CartSidebar } from './components/cart/CartSidebar';
+import type { Product, CartItem, User } from './types';
 import apiService from './services/api';
+import { SuccessModal } from './components/ui/SuccessModal';
 
 export default function App() {
-   // State untuk menyimpan data user dan token
+  // State untuk menyimpan data user dan token
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-
-
-    // State untuk mengontrol tampilan antara login dan register
+  
+  // State untuk mengontrol tampilan antara login dan register
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
-
-  const [cartItems, setCartItems] = useState<CartItem[] | any[]>([]);
+  
+  // State untuk aplikasi utama
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [showCheckoutMessage, setShowCheckoutMessage] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
+  // Cek token di localStorage saat aplikasi pertama kali dimuat
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    if (storedToken && storedUser) {
+      setToken(storedToken);
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  // Handler setelah login berhasil
+  const handleLoginSuccess = (data: { user: User; access_token: string }) => {
+    setUser(data.user);
+    setToken(data.access_token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.setItem('token', data.access_token);
+  };
+
+  // Handler setelah registrasi berhasil
+  const handleRegisterSuccess = () => {
+    setAuthView('login');
+  };
+  
+  // Handler untuk logout
+  const handleLogout = async () => {
+    try {
+        await apiService('/auth/logout', { method: 'POST' });
+    } catch (error) {
+        console.error('Logout failed, but logging out client-side anyway:', error);
+    } finally {
+        setUser(null);
+        setToken(null);
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+    }
+  };
+
+  // Handler untuk keranjang belanja
   const handleAddToCart = (productToAdd: Product, quantity: number) => {
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === productToAdd.id);
@@ -41,47 +79,33 @@ export default function App() {
     setIsCartOpen(!isCartOpen);
   };
   
-  const handleCheckout = () => {
-    if (cartItems.length > 0) {
-        setShowCheckoutMessage(true);
+  // Memperbarui fungsi checkout untuk memanggil API
+  const handleCheckout = async () => {
+    if (cartItems.length === 0) return;
+
+    const checkoutData = {
+        payment_method: 'cash',
+        items: cartItems.map(item => ({
+            product_id: item.id,
+            quantity: item.quantity,
+        })),
+    };
+
+    try {
+        await apiService('/checkout', {
+            method: 'POST',
+            body: JSON.stringify(checkoutData),
+        });
+        
         setCartItems([]);
         setIsCartOpen(false);
-        setTimeout(() => setShowCheckoutMessage(false), 3000);
+        setIsSuccessModalOpen(true);
+
+    } catch (error: any) {
+        console.error('Checkout failed:', error);
+        alert(error.error || 'Checkout gagal, silakan coba lagi.');
     }
   };
-
-
-  // Handler setelah registrasi berhasil
-  const handleRegisterSuccess = () => {
-    // Arahkan ke halaman login setelah registrasi berhasil
-    setAuthView('login');
-  };
-
-   // Handler setelah login berhasil
-  const handleLoginSuccess = (data: { user: User; access_token: string }) => {
-    setUser(data.user);
-    setToken(data.access_token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    localStorage.setItem('token', data.access_token);
-  };
-
-   // Handler untuk logout
-  const handleLogout = async () => {
-    try {
-        await apiService('/auth/logout', {
-            method: 'POST',
-        });
-    } catch (error) {
-        console.error('Logout failed, but logging out client-side anyway:', error);
-    } finally {
-        // Selalu hapus data dari client-side, bahkan jika API gagal
-        setUser(null);
-        setToken(null);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-    }
-  };
-
 
   if (!user || !token) {
     return authView === 'login' ? (
@@ -93,18 +117,24 @@ export default function App() {
 
   return (
     <div>
-      <button onClick={handleLogout} className="fixed bottom-4 right-4 z-50 bg-red-500 text-white p-3 rounded-full shadow-lg">
-        Logout
-      </button>
+      <SuccessModal 
+        isOpen={isSuccessModalOpen}
+        onClose={() => setIsSuccessModalOpen(false)}
+        title="Pesanan Berhasil!"
+        message="Pesanan Anda telah kami terima dan akan segera diproses."
+      />
 
       {user.role === 'admin' ? (
-        <AdminDashboard />
+        // Teruskan fungsi handleLogout sebagai prop
+        <AdminDashboard onLogout={handleLogout} />
       ) : (
         <>
           <CustomerView 
+            user={user}
             cartItems={cartItems}
             onAddToCart={handleAddToCart} 
             onToggleCart={handleToggleCart}
+            onLogout={handleLogout}
           />
           <CartSidebar 
             isOpen={isCartOpen}
