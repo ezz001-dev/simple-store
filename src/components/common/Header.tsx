@@ -1,26 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { SearchIcon, UserIcon } from '../../assets/icons';
-import type { CartItem, User } from '../../types'; 
-
-// Ikon-ikon baru untuk menu profil
-const AccountIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-    </svg>
-);
-
-const SettingsIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    </svg>
-);
-
-const LogoutIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-    </svg>
-);
+import type { CartItem, User } from '../../types';
+import { Search, User as UserIcon, LogOut, Settings, CircleUserRound, ChevronDown } from 'lucide-react';
 
 interface HeaderProps {
   cartItems: CartItem[];
@@ -30,10 +10,17 @@ interface HeaderProps {
   user: User | null;
 }
 
+const dummyCategories = ['All Categories', 'Fruits & Veges', 'Breads & Sweets', 'Juices'];
+
 export const Header: React.FC<HeaderProps> = ({ cartItems, onToggleCart, onSearch, onLogout, user }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(dummyCategories[0]);
+  
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const categoryMenuRef = useRef<HTMLDivElement>(null);
+  
   const cartTotalPrice = cartItems.reduce((total, item) => total + parseFloat(item.price) * item.quantity, 0);
 
   // Efek untuk debouncing
@@ -51,12 +38,15 @@ export const Header: React.FC<HeaderProps> = ({ cartItems, onToggleCart, onSearc
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
         setIsProfileMenuOpen(false);
       }
+      if (categoryMenuRef.current && !categoryMenuRef.current.contains(event.target as Node)) {
+        setIsCategoryMenuOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [profileMenuRef]);
+  }, [profileMenuRef, categoryMenuRef]);
 
 
   return (
@@ -67,23 +57,53 @@ export const Header: React.FC<HeaderProps> = ({ cartItems, onToggleCart, onSearc
             <div className="text-3xl font-bold text-green-600">Kkomi</div>
             <p className="text-sm text-gray-500">Korean Cafe - Mart</p>
           </div>
+          
+          {/* Filter Pencarian */}
           <div className="hidden md:flex flex-grow max-w-xl mx-8">
-            <div className="relative w-full flex items-center border border-gray-300 rounded-md">
-              <span className="pl-4 pr-2 text-gray-500">All Categories</span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+            <div className="relative w-full h-12 flex items-center bg-gray-100 rounded-full">
+              <div className="relative" ref={categoryMenuRef}>
+                <button 
+                  onClick={() => setIsCategoryMenuOpen(prev => !prev)}
+                  className="flex items-center pl-4 pr-2 py-2 text-sm text-gray-600"
+                >
+                  <span>{selectedCategory}</span>
+                  <ChevronDown size={16} className="ml-1" />
+                </button>
+                {isCategoryMenuOpen && (
+                  <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg z-30 border border-gray-200">
+                    {dummyCategories.map(cat => (
+                      <a 
+                        key={cat} 
+                        href="#" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setSelectedCategory(cat);
+                          setIsCategoryMenuOpen(false);
+                        }}
+                        className="block px-2 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        {cat}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
               <div className="h-6 border-l border-gray-300 mx-2"></div>
+              
               <input
                 type="text"
                 placeholder="Search for more than 20,000 products"
-                className="w-full py-2 pl-2 pr-10 focus:outline-none"
+                className="w-full py-2 pl-2 pr-10 bg-transparent focus:outline-none text-sm"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                <SearchIcon />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                <Search size={20} className="text-gray-400" />
               </div>
             </div>
           </div>
+
           <div className="flex items-center space-x-6">
             <div className="text-right hidden lg:block">
               <p className="text-sm text-gray-500">For Support?</p>
@@ -92,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({ cartItems, onToggleCart, onSearc
             
             <div className="relative" ref={profileMenuRef}>
               <button onClick={() => setIsProfileMenuOpen(prev => !prev)}>
-                <UserIcon />
+                <UserIcon size={24} className="text-gray-700" />
               </button>
               {isProfileMenuOpen && (
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-30 border border-gray-200">
@@ -104,11 +124,11 @@ export const Header: React.FC<HeaderProps> = ({ cartItems, onToggleCart, onSearc
                   )}
                   <div className="py-1">
                     <a href="#" className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      <AccountIcon />
+                      <CircleUserRound size={18} className="mr-3 text-gray-500" />
                       Akun Saya
                     </a>
                     <a href="#" className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      <SettingsIcon />
+                      <Settings size={18} className="mr-3 text-gray-500" />
                       Pengaturan
                     </a>
                   </div>
@@ -117,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({ cartItems, onToggleCart, onSearc
                       onClick={onLogout}
                       className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
-                      <LogoutIcon />
+                      <LogOut size={18} className="mr-3 text-gray-500" />
                       Logout
                     </button>
                   </div>

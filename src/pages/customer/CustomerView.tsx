@@ -5,28 +5,27 @@ import { Footer } from '../../components/common/Footer';
 import type { Product, CartItem, Category, PaginatedResponse, User } from '../../types';
 import apiService from '../../services/api';
 import { LoadingSpinner, ErrorMessage } from '../../components/ui/FeedbackComponents';
-import { LeafIcon, BreadIcon, JuiceIcon, PepperIcon, BagIcon } from '../../assets/icons/index';
+import { Apple, CakeSlice, GlassWater, Carrot, ShoppingBag, Popcorn } from 'lucide-react';
 
-
-// Data kategori sekarang menjadi data statis di dalam komponen
+// Data kategori sekarang menggunakan ikon dari Lucide
 const staticCategories: Category[] = [
-  { name: 'Fruits & Veges', icon: <LeafIcon />, filter: 'FRUITS & VEGES' },
-  { name: 'Breads & Sweets', icon: <BreadIcon />, filter: 'BREADS' },
-  { name: 'Fruits & Veges', icon: <JuiceIcon />, filter: 'JUICES' },
-  { name: 'Fruits & Veges', icon: <PepperIcon />, filter: 'FRUITS & VEGES' },
-  { name: 'Fruits & Veges', icon: <LeafIcon />, filter: 'FRUITS & VEGES' },
-  { name: 'Fruits & Veges', icon: <BagIcon />, filter: 'JUICES' },
+  { name: 'Fruits & Veges', icon: <Apple size={32} className="text-gray-600" />, filter: 'FRUITS & VEGES' },
+  { name: 'Breads & Sweets', icon: <CakeSlice size={32} className="text-gray-600" />, filter: 'BREADS' },
+  { name: 'Juices', icon: <GlassWater size={32} className="text-gray-600" />, filter: 'JUICES' },
+  { name: 'Vegetables', icon: <Carrot size={32} className="text-gray-600" />, filter: 'FRUITS & VEGES' },
+  { name: 'Groceries', icon: <ShoppingBag size={32} className="text-gray-600" />, filter: 'GROCERIES' },
+  { name: 'Snacks', icon: <Popcorn size={32} className="text-gray-600" />, filter: 'SNACKS' },
 ];
 
 interface CustomerViewProps {
+    user: User | null;
     cartItems: CartItem[];
-    user : User;
     onAddToCart: (product: Product, quantity: number) => void;
     onToggleCart: () => void;
     onLogout: () => void;
 }
 
-export const CustomerView: React.FC<CustomerViewProps> = ({ cartItems, onAddToCart, onToggleCart, onLogout , user }) => {
+export const CustomerView: React.FC<CustomerViewProps> = ({ user, cartItems, onAddToCart, onToggleCart, onLogout }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +51,7 @@ export const CustomerView: React.FC<CustomerViewProps> = ({ cartItems, onAddToCa
     fetchProducts(searchQuery);
   }, [searchQuery, fetchProducts]);
   
-  const filteredProducts = products; // Filtering sudah dilakukan di backend
+  const filteredProducts = products;
 
   return (
     <div className="bg-white min-h-screen font-sans">
@@ -61,7 +60,7 @@ export const CustomerView: React.FC<CustomerViewProps> = ({ cartItems, onAddToCa
         cartItems={cartItems} 
         onToggleCart={onToggleCart} 
         onSearch={setSearchQuery}
-        onLogout={onLogout} 
+        onLogout={onLogout}
       />
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">

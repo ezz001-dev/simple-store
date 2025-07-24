@@ -1,12 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
-import { SearchIcon } from '../../assets/icons';
 import { ProductManagementPage } from './ProductManagementPage';
+import { TransactionPage } from './TransactionPage'; // Impor halaman baru
 import apiService from '../../services/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { LoadingSpinner, ErrorMessage } from '../../components/ui/FeedbackComponents';
+import { LayoutDashboard, Package, ShoppingCart, Menu, Search, Bell, UserCircle, LogOut, Wallet, Archive, TrendingUp, ThumbsUp } from 'lucide-react';
 
-// Tipe data untuk statistik dasbor
 interface DashboardStats {
     summary: {
         total_revenue: string;
@@ -25,84 +24,12 @@ const DashboardView: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const dummyStats = {
-    "summary": {
-        "total_revenue": "50000000.00",
-        "total_stock": 145,
-        "items_sold": 290,
-        "category_count": 5
-    },
-    "monthly_sales": [
-        {
-            "month": "Feb",
-            "total": 12000000
-        },
-        {
-            "month": "Mar",
-            "total": 19000000
-        },
-        {
-            "month": "Apr",
-            "total": 15000000
-        },
-        {
-            "month": "Mei",
-            "total": 25000000
-        },
-        {
-            "month": "Jun",
-            "total": 21000000
-        },
-        {
-            "month": "Jul",
-            "total": 32000000
-        }
-    ],
-    "best_sellers": [
-        {
-            "name": "Melon Juice",
-            "quantity": 500
-        },
-        {
-            "name": "Banana Juice",
-            "quantity": 300
-        },
-        {
-            "name": "Strawberry Juice",
-            "quantity": 100
-        }
-    ],
-    "stock_levels": [
-        {
-            "name": "Sunstar Fresh Strawberry Juice",
-            "stock": 20
-        },
-        {
-            "name": "Chocolate",
-            "stock": 40
-        },
-        {
-            "name": "Sunstar Fresh Fruit Juice",
-            "stock": 50
-        },
-        {
-            "name": "Sunstar Fresh Banana Juice",
-            "stock": 60
-        },
-        {
-            "name": "Sunstar Fresh Melon Juice",
-            "stock": 80
-        }
-    ]
-}
-
     useEffect(() => {
         const fetchDashboardStats = async () => {
             setIsLoading(true);
             try {
-                // Ganti dengan endpoint yang benar jika sudah ada
                 const data = await apiService<DashboardStats>('/dashboard/stats');
-                setStats(dummyStats);
+                setStats(data);
             } catch (err) {
                 setError('Gagal memuat statistik dasbor.');
             } finally {
@@ -118,14 +45,26 @@ const DashboardView: React.FC = () => {
 
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
+    const summaryCards = [
+        { title: 'Total Semua Pendapatan', value: `Rp ${Number(stats.summary.total_revenue).toLocaleString('id-ID')}`, icon: <Wallet size={32} className="text-yellow-500" />, bgColor: 'bg-white' },
+        { title: 'Stok Barang', value: stats.summary.total_stock, icon: <Archive size={32} className="text-red-500" />, bgColor: 'bg-white' },
+        { title: 'Barang Telah Terjual', value: `${stats.summary.items_sold}+`, icon: <TrendingUp size={32} className="text-green-500" />, bgColor: 'bg-green-100' },
+        { title: 'Kategori Barang', value: stats.summary.category_count, icon: <ThumbsUp size={32} className="text-blue-500" />, bgColor: 'bg-white' },
+    ];
+
     return (
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-            {/* Kartu Ringkasan Dinamis */}
+            {/* Kartu Ringkasan Dinamis dengan Ikon Lucide */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                <div className="p-6 rounded-lg shadow-sm bg-white flex justify-between items-center"><div><p className="text-sm text-gray-500">Total Semua Pendapatan</p><p className="text-2xl font-bold">Rp {Number(stats.summary.total_revenue).toLocaleString('id-ID')}</p></div><div className="text-4xl">💰</div></div>
-                <div className="p-6 rounded-lg shadow-sm bg-white flex justify-between items-center"><div><p className="text-sm text-gray-500">Stok Barang</p><p className="text-2xl font-bold">{stats.summary.total_stock}</p></div><div className="text-4xl">📦</div></div>
-                <div className="p-6 rounded-lg shadow-sm bg-green-100 flex justify-between items-center"><div><p className="text-sm text-gray-500">Barang Telah Terjual</p><p className="text-2xl font-bold">{stats.summary.items_sold}+</p></div><div className="text-4xl">📈</div></div>
-                <div className="p-6 rounded-lg shadow-sm bg-white flex justify-between items-center"><div><p className="text-sm text-gray-500">Kategori Barang</p><p className="text-2xl font-bold">{stats.summary.category_count}</p></div><div className="text-4xl">👍</div></div>
+                {summaryCards.map((card, index) => (
+                    <div key={index} className={`p-6 rounded-lg shadow-sm flex justify-between items-center ${card.bgColor}`}>
+                        <div>
+                            <p className="text-sm text-gray-500">{card.title}</p>
+                            <p className="text-2xl font-bold">{card.value}</p>
+                        </div>
+                        <div>{card.icon}</div>
+                    </div>
+                ))}
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -176,78 +115,67 @@ const DashboardView: React.FC = () => {
     );
 };
 
-
-// Ikon Logout
-const LogoutIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-    </svg>
-);
-
 interface AdminDashboardProps {
     onLogout: () => void;
 }
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout })  => {
-    const [currentView, setCurrentView] = useState<'dashboard' | 'products'>('dashboard');
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
+    const [currentView, setCurrentView] = useState<'dashboard' | 'products' | 'transactions'>('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     return (
         <div className="flex h-screen bg-gray-100 font-sans">
-            {/* Backdrop untuk sidebar mobile */}
             <div
                 className={`fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
                 onClick={() => setIsSidebarOpen(false)}
             ></div>
 
-            {/* Sidebar */}
-            <aside className={`fixed lg:relative inset-y-0 left-0 w-64 bg-white shadow-md z-30 transform transition-transform lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                <div className="p-6 flex items-center space-x-2">
-                    <div className="w-10 h-10 bg-blue-600 text-white flex items-center justify-center rounded-md text-xl font-bold">WH</div>
-                    <h1 className="text-xl font-bold text-gray-800">AWH</h1>
+            <aside className={`fixed lg:relative inset-y-0 left-0 w-64 bg-white shadow-md z-30 transform transition-transform lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col`}>
+                <div className="flex-grow">
+                    <div className="p-6 flex items-center space-x-2">
+                        <div className="w-10 h-10 bg-blue-600 text-white flex items-center justify-center rounded-md text-xl font-bold">WH</div>
+                        <h1 className="text-xl font-bold text-gray-800">AWH</h1>
+                    </div>
+                    <nav className="mt-6 px-4">
+                        <p className="text-xs text-gray-400 uppercase px-4 mb-2">AWH</p>
+                        <button onClick={() => { setCurrentView('dashboard'); setIsSidebarOpen(false); }} className={`w-full flex items-center px-4 py-3 font-semibold rounded-lg ${currentView === 'dashboard' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}><LayoutDashboard size={20} className="mr-3" /> Dashboard</button>
+                        <p className="text-xs text-gray-400 uppercase px-4 mt-6 mb-2">PAGES</p>
+                        <button onClick={() => { setCurrentView('products'); setIsSidebarOpen(false); }} className={`w-full flex items-center px-4 py-3 font-semibold rounded-lg ${currentView === 'products' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}><Package size={20} className="mr-3" /> Master Barang</button>
+                        <button onClick={() => { setCurrentView('transactions'); setIsSidebarOpen(false); }} className={`w-full flex items-center px-4 py-3 font-semibold rounded-lg ${currentView === 'transactions' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}><ShoppingCart size={20} className="mr-3" /> Transaksi</button>
+                    </nav>
                 </div>
-                <nav className="mt-6 px-4">
-                    <p className="text-xs text-gray-400 uppercase px-4 mb-2">AWH</p>
-                    <button onClick={() => { setCurrentView('dashboard'); setIsSidebarOpen(false); }} className={`w-full flex items-center px-4 py-3 font-semibold rounded-lg ${currentView === 'dashboard' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}><span className="mr-3">📊</span> Dashboard</button>
-                    <p className="text-xs text-gray-400 uppercase px-4 mt-6 mb-2">PAGES</p>
-                    <button onClick={() => { setCurrentView('products'); setIsSidebarOpen(false); }} className={`w-full flex items-center px-4 py-3 font-semibold rounded-lg ${currentView === 'products' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}><span className="mr-3">📦</span> Master Barang</button>
-                    <a href="#" className="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg"><span className="mr-3">🛒</span> Transaksi</a>
-                </nav>
-
-                {/* Tombol Logout di bagian bawah sidebar */}
+                
                 <div className="p-4">
                     <button onClick={onLogout} className="w-full flex items-center px-4 py-3 text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-lg font-semibold">
-                        <LogoutIcon />
-                        <span className="ml-3">Logout</span>
+                        <LogOut size={20} className="mr-3" />
+                        <span>Logout</span>
                     </button>
                 </div>
             </aside>
             
             <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Top Navigation */}
-                <header className="flex justify-between items-center p-4 bg-white shadow-md">
+                <header className="flex justify-between items-center p-4 bg-white shadow-sm">
                     <div className="flex items-center">
                         <button className="text-gray-500 lg:hidden" onClick={() => setIsSidebarOpen(true)}>
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                            <Menu size={24} />
                         </button>
                         <div className="relative flex items-center ml-4">
                             <input type="text" placeholder="Search..." className="bg-gray-100 pl-4 pr-10 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <SearchIcon />
+                                <Search size={20} className="text-gray-400" />
                             </div>
                         </div>
                     </div>
                     <div className="flex items-center space-x-4">
-                        <button className="text-gray-500"><span>🔔</span></button>
-                        <button className="text-gray-500"><span>👤</span></button>
+                        <button className="text-gray-500"><Bell size={22} /></button>
+                        <button className="text-gray-500"><UserCircle size={22} /></button>
                     </div>
                 </header>
 
-                {/* Main Content (Render berdasarkan view yang aktif) */}
                 {currentView === 'dashboard' && <DashboardView />}
                 {currentView === 'products' && <ProductManagementPage />}
+                {currentView === 'transactions' && <TransactionPage />}
             </div>
         </div>
     );
 };
-

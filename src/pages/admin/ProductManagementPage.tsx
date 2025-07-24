@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import apiService from '../../services/api';
 import type { Product, PaginatedResponse } from '../../types';
-import apiService , { API_BASE_URL_STORAGE } from '../../services/api';
-
 import { ProductFormModal } from '../../components/admin/ProductFormModal';
 import { ConfirmationModal } from '../../components/admin/ConfirmationModal';
 import { LoadingSpinner, ErrorMessage } from '../../components/ui/FeedbackComponents';
+import { PlusCircle, FilePenLine, Trash2 } from 'lucide-react';
 
+const API_BASE_URL_STORAGE = 'http://127.0.0.1:8000';
 
 export const ProductManagementPage: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
@@ -30,7 +31,6 @@ export const ProductManagementPage: React.FC = () => {
 
     // Fungsi untuk mengambil data produk dari API
     const fetchProducts = useCallback(async () => {
-        // Jangan set loading ke true jika hanya me-refresh
         if (!isLoading) setIsLoading(true);
         try {
             const response = await apiService<PaginatedResponse<Product>>('/products');
@@ -74,7 +74,7 @@ export const ProductManagementPage: React.FC = () => {
     
     // Handler yang dipanggil setelah form berhasil disimpan
     const handleSaveSuccess = () => {
-        fetchProducts(); // Muat ulang data
+        fetchProducts();
         showFeedback('Produk berhasil disimpan!');
     };
 
@@ -87,7 +87,7 @@ export const ProductManagementPage: React.FC = () => {
                 method: 'DELETE',
             });
             handleCloseModals();
-            fetchProducts(); // Muat ulang data setelah berhasil hapus
+            fetchProducts();
             showFeedback('Produk berhasil dihapus!');
         } catch (err) {
             showFeedback('Gagal menghapus produk. Silakan coba lagi.', 'error');
@@ -102,7 +102,6 @@ export const ProductManagementPage: React.FC = () => {
     return (
         <>
             <div className="p-6">
-                {/* Notifikasi Feedback */}
                 {feedback && (
                     <div className={`mb-4 p-4 rounded-lg text-white ${feedback.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
                         {feedback.message}
@@ -111,13 +110,14 @@ export const ProductManagementPage: React.FC = () => {
 
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-semibold text-gray-800">Master Barang</h2>
-                    <button onClick={handleOpenAddModal} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-sm">
-                        + Tambah Produk
+                    <button onClick={handleOpenAddModal} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-sm flex items-center space-x-2">
+                        <PlusCircle size={18} />
+                        <span>Tambah Produk</span>
                     </button>
                 </div>
 
                 <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
-                    <table className="w-full min-w-[600px]">
+                    <table className="w-full min-w-[700px]">
                         <thead>
                             <tr className="text-left text-gray-500 border-b">
                                 <th className="py-3 px-4 text-xs font-semibold uppercase">Gambar</th>
@@ -132,9 +132,7 @@ export const ProductManagementPage: React.FC = () => {
                                 <tr key={product.id} className="border-b hover:bg-gray-50">
                                     <td className="py-2 px-4">
                                         <img 
-                                            src={product.image_url 
-                                                ? `${API_BASE_URL_STORAGE}${product.image_url}` 
-                                                : `https://placehold.co/300x300/e2e8f0/333?text=${encodeURIComponent(product.name)}`} 
+                                            src={product.image_url ? `${API_BASE_URL_STORAGE}${product.image_url}` : 'https://placehold.co/100x100/e2e8f0/333?text=N/A'} 
                                             alt={product.name}
                                             className="h-12 w-12 object-cover rounded-md"
                                         />
@@ -144,8 +142,12 @@ export const ProductManagementPage: React.FC = () => {
                                     <td className="py-4 px-4 text-sm text-gray-600">{product.stock}</td>
                                     <td className="py-4 px-4">
                                         <div className="flex space-x-2">
-                                            <button onClick={() => handleOpenEditModal(product)} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium hover:bg-blue-200">Edit</button>
-                                            <button onClick={() => handleOpenDeleteModal(product)} className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-medium hover:bg-red-200">Hapus</button>
+                                            <button onClick={() => handleOpenEditModal(product)} className="p-2 text-blue-600 hover:bg-blue-100 rounded-full">
+                                                <FilePenLine size={16} />
+                                            </button>
+                                            <button onClick={() => handleOpenDeleteModal(product)} className="p-2 text-red-600 hover:bg-red-100 rounded-full">
+                                                <Trash2 size={16} />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -155,11 +157,10 @@ export const ProductManagementPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Render Modal Form dan Konfirmasi */}
             <ProductFormModal
                 isOpen={isFormModalOpen}
                 onClose={handleCloseModals}
-                onSave={handleSaveSuccess} // Menggunakan handler baru
+                onSave={handleSaveSuccess}
                 productToEdit={productToEdit}
             />
 
