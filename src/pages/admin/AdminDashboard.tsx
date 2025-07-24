@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { SearchIcon } from '../../assets/icons';
 import { ProductManagementPage } from './ProductManagementPage';
@@ -99,8 +100,9 @@ const DashboardView: React.FC = () => {
         const fetchDashboardStats = async () => {
             setIsLoading(true);
             try {
+                // Ganti dengan endpoint yang benar jika sudah ada
                 const data = await apiService<DashboardStats>('/dashboard/stats');
-                setStats(data);
+                setStats(dummyStats);
             } catch (err) {
                 setError('Gagal memuat statistik dasbor.');
             } finally {
@@ -174,34 +176,78 @@ const DashboardView: React.FC = () => {
     );
 };
 
-export const AdminDashboard: React.FC = () => {
+
+// Ikon Logout
+const LogoutIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+    </svg>
+);
+
+interface AdminDashboardProps {
+    onLogout: () => void;
+}
+
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout })  => {
     const [currentView, setCurrentView] = useState<'dashboard' | 'products'>('dashboard');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     return (
         <div className="flex h-screen bg-gray-100 font-sans">
-            <aside className="w-64 bg-white shadow-md hidden lg:block">
+            {/* Backdrop untuk sidebar mobile */}
+            <div
+                className={`fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                onClick={() => setIsSidebarOpen(false)}
+            ></div>
+
+            {/* Sidebar */}
+            <aside className={`fixed lg:relative inset-y-0 left-0 w-64 bg-white shadow-md z-30 transform transition-transform lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="p-6 flex items-center space-x-2">
                     <div className="w-10 h-10 bg-blue-600 text-white flex items-center justify-center rounded-md text-xl font-bold">WH</div>
                     <h1 className="text-xl font-bold text-gray-800">AWH</h1>
                 </div>
                 <nav className="mt-6 px-4">
                     <p className="text-xs text-gray-400 uppercase px-4 mb-2">AWH</p>
-                    <button onClick={() => setCurrentView('dashboard')} className={`w-full flex items-center px-4 py-3 font-semibold rounded-lg ${currentView === 'dashboard' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}><span className="mr-3">📊</span> Dashboard</button>
+                    <button onClick={() => { setCurrentView('dashboard'); setIsSidebarOpen(false); }} className={`w-full flex items-center px-4 py-3 font-semibold rounded-lg ${currentView === 'dashboard' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}><span className="mr-3">📊</span> Dashboard</button>
                     <p className="text-xs text-gray-400 uppercase px-4 mt-6 mb-2">PAGES</p>
-                    <button onClick={() => setCurrentView('products')} className={`w-full flex items-center px-4 py-3 font-semibold rounded-lg ${currentView === 'products' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}><span className="mr-3">📦</span> Master Barang</button>
+                    <button onClick={() => { setCurrentView('products'); setIsSidebarOpen(false); }} className={`w-full flex items-center px-4 py-3 font-semibold rounded-lg ${currentView === 'products' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}><span className="mr-3">📦</span> Master Barang</button>
                     <a href="#" className="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg"><span className="mr-3">🛒</span> Transaksi</a>
                 </nav>
+
+                {/* Tombol Logout di bagian bawah sidebar */}
+                <div className="p-4">
+                    <button onClick={onLogout} className="w-full flex items-center px-4 py-3 text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-lg font-semibold">
+                        <LogoutIcon />
+                        <span className="ml-3">Logout</span>
+                    </button>
+                </div>
             </aside>
             
             <div className="flex-1 flex flex-col overflow-hidden">
-                <header className="flex justify-between items-center p-4 bg-white border-b">
-                    <div className="flex items-center"><button className="text-gray-500 lg:hidden"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button><div className="relative ml-4"><SearchIcon /><input type="text" placeholder="Search..." className="pl-8 pr-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500" /></div></div>
-                    <div className="flex items-center space-x-4"><button className="text-gray-500"><span>🔔</span></button><button className="text-gray-500"><span>👤</span></button></div>
+                {/* Top Navigation */}
+                <header className="flex justify-between items-center p-4 bg-white shadow-md">
+                    <div className="flex items-center">
+                        <button className="text-gray-500 lg:hidden" onClick={() => setIsSidebarOpen(true)}>
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        </button>
+                        <div className="relative flex items-center ml-4">
+                            <input type="text" placeholder="Search..." className="bg-gray-100 pl-4 pr-10 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <SearchIcon />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                        <button className="text-gray-500"><span>🔔</span></button>
+                        <button className="text-gray-500"><span>👤</span></button>
+                    </div>
                 </header>
 
+                {/* Main Content (Render berdasarkan view yang aktif) */}
                 {currentView === 'dashboard' && <DashboardView />}
                 {currentView === 'products' && <ProductManagementPage />}
             </div>
         </div>
     );
 };
+
