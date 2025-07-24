@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import apiService from '../../services/api';
 import type { User } from '../../types';
 
-// Tipe untuk properti yang diterima oleh halaman login/register
 interface AuthPageProps {
   onLoginSuccess: (data: { user: User; access_token: string }) => void;
   onRegisterSuccess: () => void;
@@ -35,11 +34,14 @@ export const LoginPage: React.FC<Pick<AuthPageProps, 'onLoginSuccess' | 'onSwitc
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+        <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-green-600">Kkomi</h1>
+            <p className="text-gray-500 mt-1">Selamat datang kembali!</p>
+        </div>
         <form onSubmit={handleSubmit}>
-          {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
+          {error && <p className="text-red-500 text-sm mb-4 text-center bg-red-50 p-3 rounded-lg">{error}</p>}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
               Email
@@ -49,7 +51,7 @@ export const LoginPage: React.FC<Pick<AuthPageProps, 'onLoginSuccess' | 'onSwitc
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
               required
             />
           </div>
@@ -62,14 +64,14 @@ export const LoginPage: React.FC<Pick<AuthPageProps, 'onLoginSuccess' | 'onSwitc
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
               required
             />
           </div>
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 disabled:bg-green-300"
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 disabled:bg-green-400 shadow-md"
           >
             {isLoading ? 'Logging in...' : 'Login'}
           </button>
@@ -117,11 +119,9 @@ export const RegisterPage: React.FC<Pick<AuthPageProps, 'onRegisterSuccess' | 'o
         alert('Registrasi berhasil! Silakan login.');
         onRegisterSuccess();
     } catch (err: any) {
-        // Menangani error validasi dari Laravel
-        if (err.email || err.password) {
-            const emailErrors = err.email ? err.email.join(' ') : '';
-            const passwordErrors = err.password ? err.password.join(' ') : '';
-            setError(`${emailErrors} ${passwordErrors}`);
+        if (err.errors) {
+            const errorMessages = Object.values(err.errors).flat().join(' ');
+            setError(errorMessages);
         } else {
             setError(err.message || 'Registrasi gagal. Silakan coba lagi.');
         }
@@ -131,11 +131,14 @@ export const RegisterPage: React.FC<Pick<AuthPageProps, 'onRegisterSuccess' | 'o
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Register</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+        <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-green-600">Kkomi</h1>
+            <p className="text-gray-500 mt-1">Buat akun baru Anda</p>
+        </div>
         <form onSubmit={handleSubmit}>
-          {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
+          {error && <p className="text-red-500 text-sm mb-4 text-center bg-red-50 p-3 rounded-lg">{error}</p>}
            <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
               Nama Lengkap
@@ -145,7 +148,7 @@ export const RegisterPage: React.FC<Pick<AuthPageProps, 'onRegisterSuccess' | 'o
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
               required
             />
           </div>
@@ -158,7 +161,7 @@ export const RegisterPage: React.FC<Pick<AuthPageProps, 'onRegisterSuccess' | 'o
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
               required
             />
           </div>
@@ -171,7 +174,7 @@ export const RegisterPage: React.FC<Pick<AuthPageProps, 'onRegisterSuccess' | 'o
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
               required
             />
           </div>
@@ -184,14 +187,14 @@ export const RegisterPage: React.FC<Pick<AuthPageProps, 'onRegisterSuccess' | 'o
               id="password_confirmation"
               value={passwordConfirmation}
               onChange={(e) => setPasswordConfirmation(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
               required
             />
           </div>
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 disabled:bg-green-300"
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300 disabled:bg-green-400 shadow-md"
           >
             {isLoading ? 'Mendaftarkan...' : 'Register'}
           </button>
