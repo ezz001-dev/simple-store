@@ -38,7 +38,7 @@ export interface Category {
  */
 export interface CartItem extends Product {
   quantity: number;
-  price : number;
+  // price : number;
 }
 
 /**
@@ -64,4 +64,34 @@ export interface User {
   name: string;
   email: string;
   role: 'admin' | 'customer';
+}
+
+// Order Detail 
+export interface OrderDetail {
+    id: number;
+    order_id: number;
+    product_id: number;
+    quantity: number;
+    price: string;
+    product: {
+        id: number;
+        name: string;
+    }
+}
+
+// Order , sesuai response API
+export interface Order {
+    id: number;
+    user_id: number;
+    total_amount: string;
+    status: string;
+    payment_method: string;
+    created_at: string;
+    updated_at: string;
+    user: {
+        id: number;
+        name: string;
+        email: string;
+    };
+    details: OrderDetail[];
 }
