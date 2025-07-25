@@ -8,11 +8,12 @@ interface HeaderProps {
   onSearch: (query: string) => void;
   onLogout: () => void;
   user: User | null;
+  isCartShaking : boolean;
 }
 
 const dummyCategories = ['All Categories', 'Fruits & Veges', 'Breads & Sweets', 'Juices'];
 
-export const Header: React.FC<HeaderProps> = ({ cartItems, onToggleCart, onSearch, onLogout, user }) => {
+export const Header: React.FC<HeaderProps> = ({ cartItems, onToggleCart, onSearch, onLogout, user , isCartShaking }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
@@ -149,12 +150,11 @@ export const Header: React.FC<HeaderProps> = ({ cartItems, onToggleCart, onSearc
             </div>
 
             <button onClick={onToggleCart} className="relative flex items-center space-x-2">
-              <div className='relative'>
-              <CartIconLucide size={24} className="text-gray-700" />
-              {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{totalItems}</span>
-              )}
-
+              <div className={`relative ${isCartShaking ? 'shake' : ''}`}>
+                <CartIconLucide size={24} className="text-gray-700" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{totalItems}</span>
+                )}
               </div>
               <div className="text-right hidden sm:block">
                 <p className="text-sm text-gray-500">Your Cart</p>

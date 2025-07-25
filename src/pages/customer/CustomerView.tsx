@@ -20,12 +20,13 @@ const staticCategories: Category[] = [
 interface CustomerViewProps {
     user: User | null;
     cartItems: CartItem[];
+    isCartShaking: boolean;
     onAddToCart: (product: Product, quantity: number) => void;
     onToggleCart: () => void;
     onLogout: () => void;
 }
 
-export const CustomerView: React.FC<CustomerViewProps> = ({ user, cartItems, onAddToCart, onToggleCart, onLogout }) => {
+export const CustomerView: React.FC<CustomerViewProps> = ({ user, cartItems, onAddToCart, onToggleCart, onLogout , isCartShaking }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +62,7 @@ export const CustomerView: React.FC<CustomerViewProps> = ({ user, cartItems, onA
         onToggleCart={onToggleCart} 
         onSearch={setSearchQuery}
         onLogout={onLogout}
+        isCartShaking={isCartShaking}
       />
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">

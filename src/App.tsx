@@ -21,6 +21,8 @@ export default function App() {
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
+  const [isCartShaking, setIsCartShaking] = useState(false);
+
   const handleLogout = async (isSilent = false) => {
     if (!isSilent) {
         try {
@@ -84,6 +86,10 @@ export default function App() {
       return [...prevItems, { ...productToAdd, quantity }];
     });
     // setIsCartOpen(true);
+
+    // Memicu animasi
+    setIsCartShaking(true);
+    setTimeout(() => setIsCartShaking(false), 550);
   };
 
   const handleRemoveFromCart = (productId: number) => {
@@ -185,6 +191,7 @@ export default function App() {
             onAddToCart={handleAddToCart} 
             onToggleCart={handleToggleCart}
             onLogout={() => handleLogout(false)} 
+            isCartShaking={isCartShaking}
           />
           <CartSidebar 
             isOpen={isCartOpen}
