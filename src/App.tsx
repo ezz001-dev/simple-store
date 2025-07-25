@@ -47,13 +47,15 @@ export default function App() {
 
     // Listener untuk event sesi berakhir
     const handleSessionExpired = () => {
-        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        if (currentUser?.role === 'admin') {
-            alert('Sesi Anda telah berakhir. Anda akan diarahkan ke halaman login.');
-            handleLogout(true); // Logout secara diam-diam
-        } else {
-            setIsSessionExpiredModalOpen(true);
-        }
+        // const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        // if (currentUser?.role === 'admin') {
+        //     alert('Sesi Anda telah berakhir. Anda akan diarahkan ke halaman login.');
+        //     handleLogout(true); // Logout secara diam-diam
+        // } else {
+        //     setIsSessionExpiredModalOpen(true);
+        // }
+
+        setIsSessionExpiredModalOpen(true);
     };
 
     window.addEventListener('session-expired', handleSessionExpired);
@@ -141,9 +143,10 @@ export default function App() {
         setIsSuccessModalOpen(true);
     } catch (error: any) {
         console.error('Checkout failed:', error);
-        // Gunakan modal error, bukan alert
+        
         setErrorMessage(error.error || 'Checkout gagal, silakan coba lagi.');
         setIsErrorModalOpen(true);
+        setIsCartOpen(false)
     }
   };
 
