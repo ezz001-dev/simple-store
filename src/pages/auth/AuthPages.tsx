@@ -10,7 +10,7 @@ interface AuthPageProps {
 
 // Komponen Halaman Login
 export const LoginPage: React.FC<Pick<AuthPageProps, 'onLoginSuccess' | 'onSwitchView'>> = ({ onLoginSuccess, onSwitchView }) => {
-  const [email, setEmail] = useState('customer@example.com');
+  const [email, setEmail] = useState('customer@gmail.com');
   const [password, setPassword] = useState('password123');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
