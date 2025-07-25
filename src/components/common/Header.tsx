@@ -115,7 +115,7 @@ export const Header: React.FC<HeaderProps> = ({ cartItems, onToggleCart, onSearc
             </div>
             
             <div className="relative" ref={profileMenuRef}>
-              <button onClick={() => setIsProfileMenuOpen(prev => !prev)}>
+              <button onClick={() => setIsProfileMenuOpen(prev => !prev)} className='hover:cursor-pointer'>
                 <UserIcon size={24} className="text-gray-700" />
               </button>
               {isProfileMenuOpen && (
@@ -149,7 +149,7 @@ export const Header: React.FC<HeaderProps> = ({ cartItems, onToggleCart, onSearc
               )}
             </div>
 
-            <button onClick={onToggleCart} className="relative flex items-center space-x-2">
+            <button onClick={onToggleCart} className="relative flex items-center space-x-2 hover:cursor-pointer">
               <div className={`relative ${isCartShaking ? 'shake' : ''}`}>
                 <CartIconLucide size={24} className="text-gray-700" />
                 {totalItems > 0 && (
