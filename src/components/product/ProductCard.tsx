@@ -26,7 +26,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col">
       <div className="flex-shrink-0">
-        <img src={imageUrl} alt={product.name} className="w-full object-cover" />
+        <img src={imageUrl} alt={product.name} className="w-full object-cover h-50 max-h-50" />
       </div>
       <div className="p-4 flex flex-col flex-grow">
         <h3 className="text-md font-semibold text-gray-800">{product.name}</h3>
