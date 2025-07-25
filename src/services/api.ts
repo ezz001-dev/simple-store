@@ -24,6 +24,13 @@ async function apiService<T>(endpoint: string, options: RequestInit = {}): Promi
       headers,
     });
 
+     // Cek jika status response adalah 401 (Unauthorized)
+    if (response.status === 401) {
+      // Jalankan event global bahwa sesi telah berakhir
+      window.dispatchEvent(new Event('session-expired'));
+    }
+    
+
      // Cek jika status response adalah 204 (No Content)
     if (response.status === 204) {
       // Kembalikan null atau objek kosong yang sesuai sebagai T

@@ -68,24 +68,29 @@ export const CustomerView: React.FC<CustomerViewProps> = ({ user, cartItems, onA
           <h2 className="text-2xl font-bold mb-4">Category</h2>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
             {staticCategories.map((cat: Category, index: number) => (
-              <button key={index} className={`flex flex-col items-center space-y-2 p-4 rounded-lg border bg-white border-gray-200 hover:shadow-md`}>
-                <div className="w-16 h-16 flex items-center justify-center">{cat.icon}</div>
-                <p className="text-sm font-medium text-center text-gray-700">{cat.name}</p>
+              <button key={index} className={`flex flex-col items-center space-y-2 p-2 sm:p-4 rounded-lg border bg-white border-gray-200 hover:shadow-md`}>
+                <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center">{cat.icon}</div>
+                <p className="text-xs sm:text-sm font-medium text-center text-gray-700">{cat.name}</p>
               </button>
             ))}
           </div>
         </section>
 
         <section>
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
             <h2 className="text-2xl font-bold">Barang</h2>
+            <div className="flex space-x-2 flex-wrap">
+              <button onClick={() => setActiveFilter('ALL')} className={`px-4 py-1 rounded-full text-sm font-semibold ${activeFilter === 'ALL' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`}>ALL</button>
+              <button onClick={() => setActiveFilter('FRUITS & VEGES')} className={`px-4 py-1 rounded-full text-sm font-semibold ${activeFilter === 'FRUITS & VEGES' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`}>FRUITS & VEGES</button>
+              <button onClick={() => setActiveFilter('JUICES')} className={`px-4 py-1 rounded-full text-sm font-semibold ${activeFilter === 'JUICES' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`}>JUICES</button>
+            </div>
           </div>
           
           {isLoading && <LoadingSpinner />}
           {error && <ErrorMessage message={error} />}
           
           {!isLoading && !error && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
               {filteredProducts.length > 0 ? (
                  filteredProducts.map(product => (
                   <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} />
