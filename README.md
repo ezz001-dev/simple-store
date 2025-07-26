@@ -1,69 +1,66 @@
-# React + TypeScript + Vite
+Aplikasi Toko Online Sederhana (Frontend)
+Ini adalah frontend untuk aplikasi toko online sederhana yang dibangun menggunakan React, TypeScript, dan Vite. Aplikasi ini menyediakan antarmuka untuk pelanggan berbelanja dan dasbor untuk admin mengelola toko.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Fitur Utama
+Tampilan Pelanggan:
 
-Currently, two official plugins are available:
+Halaman utama dengan daftar produk dan fitur pencarian.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Keranjang belanja interaktif dengan manajemen kuantitas.
 
-## Expanding the ESLint configuration
+Proses checkout yang terintegrasi dengan backend.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Dasbor Admin:
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Halaman utama dengan visualisasi data penjualan (grafik garis & donat).
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+Manajemen produk penuh (CRUD) dengan form modal dan unggah gambar.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Halaman untuk melihat riwayat transaksi.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Autentikasi: Halaman login dan registrasi yang terhubung dengan API JWT.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Desain Responsif: Tampilan dioptimalkan untuk perangkat desktop, tablet, dan mobile.
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Teknologi yang Digunakan
+Framework: React dengan Vite
+
+Bahasa: TypeScript
+
+Styling: Tailwind CSS
+
+Grafik: Recharts
+
+Ikon: Lucide React
+
+Panduan Instalasi
+Berikut adalah langkah-langkah untuk menjalankan proyek ini di lingkungan lokal.
+
+1. Prasyarat
+   Node.js (versi 16 atau lebih baru)
+
+NPM atau Yarn
+
+2. Instalasi Proyek
+   Clone repository ini:
+
+git clone https://github.com/ezz001-dev/simple-store.git
+cd simple-store
+
+Instal dependensi Node.js:
+
+npm install
+
+Konfigurasi URL API:
+Buka file src/services/api.ts lalu isi variable
+API_BASE_URL dan API_BASE_URL_STORAGE menunjuk ke alamat server backend Laravel
+
+Pastikan Backend Berjalan:
+Sebelum menjalankan frontend, pastikan server backend Laravel sudah aktif dan berjalan.
+
+3. Menjalankan Server
+   Jalankan server pengembangan Vite:
+
+npm run dev
+
+Aplikasi akan tersedia di http://localhost:5173 (atau port lain yang tersedia).

@@ -116,7 +116,7 @@ export const RegisterPage: React.FC<Pick<AuthPageProps, 'onRegisterSuccess' | 'o
                 password_confirmation: passwordConfirmation,
             }),
         });
-        alert('Registrasi berhasil! Silakan login.');
+        
         onRegisterSuccess();
     } catch (err: any) {
         if (err.errors) {

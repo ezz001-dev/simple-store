@@ -15,13 +15,17 @@ export default function App() {
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [isSessionExpiredModalOpen, setIsSessionExpiredModalOpen] = useState(false); 
-
+  const [isSessionExpiredModalOpen, setIsSessionExpiredModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
   const [isCartShaking, setIsCartShaking] = useState(false);
+  
+  // State yang lebih generik untuk modal sukses
+  const [successModal, setSuccessModal] = useState<{ isOpen: boolean; title: string; message: string; onClose?: () => void }>({
+    isOpen: false,
+    title: '',
+    message: '',
+  });
 
   const handleLogout = async (isSilent = false) => {
     if (!isSilent) {
@@ -45,22 +49,18 @@ export default function App() {
       setUser(JSON.parse(storedUser));
     }
 
-    // Listener untuk event sesi berakhir
     const handleSessionExpired = () => {
-        // const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        // if (currentUser?.role === 'admin') {
-        //     alert('Sesi Anda telah berakhir. Anda akan diarahkan ke halaman login.');
-        //     handleLogout(true); // Logout secara diam-diam
-        // } else {
-        //     setIsSessionExpiredModalOpen(true);
-        // }
-
-        setIsSessionExpiredModalOpen(true);
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (currentUser?.role === 'admin') {
+            alert('Sesi Anda telah berakhir. Anda akan diarahkan ke halaman login.');
+            handleLogout(true);
+        } else {
+            setIsSessionExpiredModalOpen(true);
+        }
     };
 
     window.addEventListener('session-expired', handleSessionExpired);
 
-    // Cleanup listener saat komponen unmount
     return () => {
         window.removeEventListener('session-expired', handleSessionExpired);
     };
@@ -73,10 +73,19 @@ export default function App() {
     localStorage.setItem('token', data.access_token);
   };
 
+  // Menggunakan modal sukses yang sudah ada untuk registrasi
   const handleRegisterSuccess = () => {
-    setAuthView('login');
+    setSuccessModal({
+        isOpen: true,
+        title: "Registrasi Berhasil!",
+        message: "Akun Anda telah berhasil dibuat. Silakan login untuk melanjutkan.",
+        onClose: () => {
+            setSuccessModal({ isOpen: false, title: '', message: '' });
+            setAuthView('login');
+        }
+    });
   };
-  
+
   const handleAddToCart = (productToAdd: Product, quantity: number) => {
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === productToAdd.id);
@@ -87,11 +96,9 @@ export default function App() {
       }
       return [...prevItems, { ...productToAdd, quantity }];
     });
-    // setIsCartOpen(true);
-
-    // Memicu animasi
+    
     setIsCartShaking(true);
-    setTimeout(() => setIsCartShaking(false), 550);
+    setTimeout(() => setIsCartShaking(false), 820);
   };
 
   const handleRemoveFromCart = (productId: number) => {
@@ -106,7 +113,7 @@ export default function App() {
             ? { ...item, quantity: item.quantity + amount }
             : item
         )
-        .filter(item => item.quantity > 0) // Hapus item jika kuantitasnya 0 atau kurang
+        .filter(item => item.quantity > 0)
     );
   };
 
@@ -114,22 +121,6 @@ export default function App() {
     setIsCartOpen(!isCartOpen);
   };
   
-  // const handleCheckout = async () => {
-  //   if (cartItems.length === 0) return;
-  //   const checkoutData = {
-  //       payment_method: 'cash',
-  //       items: cartItems.map(item => ({ product_id: item.id, quantity: item.quantity })),
-  //   };
-  //   try {
-  //       await apiService('/checkout', { method: 'POST', body: JSON.stringify(checkoutData) });
-  //       setCartItems([]);
-  //       setIsCartOpen(false);
-  //       setIsSuccessModalOpen(true);
-  //   } catch (error: any) {
-  //       alert(error.error || 'Checkout gagal, silakan coba lagi.');
-  //   }
-  // };
-
   const handleCheckout = async () => {
     if (cartItems.length === 0) return;
     const checkoutData = {
@@ -140,19 +131,20 @@ export default function App() {
         await apiService('/checkout', { method: 'POST', body: JSON.stringify(checkoutData) });
         setCartItems([]);
         setIsCartOpen(false);
-        setIsSuccessModalOpen(true);
+        setSuccessModal({
+            isOpen: true,
+            title: "Pesanan Berhasil!",
+            message: "Pesanan Anda telah kami terima dan akan segera diproses."
+        });
     } catch (error: any) {
-        console.error('Checkout failed:', error);
-        
         setErrorMessage(error.error || 'Checkout gagal, silakan coba lagi.');
         setIsErrorModalOpen(true);
-        setIsCartOpen(false)
     }
   };
 
   const handleCloseExpiredModal = () => {
     setIsSessionExpiredModalOpen(false);
-    handleLogout(true); // Logout setelah modal ditutup
+    handleLogout(true);
   };
 
   if (!user || !token) {
@@ -164,6 +156,12 @@ export default function App() {
               <RegisterPage onRegisterSuccess={handleRegisterSuccess} onSwitchView={setAuthView} />
             )}
             <SessionExpiredModal isOpen={isSessionExpiredModalOpen} onClose={handleCloseExpiredModal} />
+            <SuccessModal 
+                isOpen={successModal.isOpen}
+                onClose={successModal.onClose || (() => setSuccessModal({ isOpen: false, title: '', message: '' }))}
+                title={successModal.title}
+                message={successModal.message}
+            />
         </>
     );
   }
@@ -171,10 +169,10 @@ export default function App() {
   return (
     <div>
       <SuccessModal 
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
-        title="Pesanan Berhasil!"
-        message="Pesanan Anda telah kami terima dan akan segera diproses."
+        isOpen={successModal.isOpen}
+        onClose={successModal.onClose || (() => setSuccessModal({ isOpen: false, title: '', message: '' }))}
+        title={successModal.title}
+        message={successModal.message}
       />
       <SessionExpiredModal isOpen={isSessionExpiredModalOpen} onClose={handleCloseExpiredModal} />
       <ErrorModal 

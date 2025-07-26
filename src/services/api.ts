@@ -24,9 +24,9 @@ async function apiService<T>(endpoint: string, options: RequestInit = {}): Promi
       headers,
     });
 
-     // Cek jika status response adalah 401 (Unauthorized)
-    if (response.status === 401) {
-      // Jalankan event global bahwa sesi telah berakhir
+
+    const isAuthRoute = endpoint.startsWith('/auth/');
+    if (response.status === 401 && token && !isAuthRoute) {
       window.dispatchEvent(new Event('session-expired'));
     }
     
@@ -71,12 +71,20 @@ export async function apiUploadService<T>(endpoint: string, formData: FormData, 
         formData.append('_method', 'PUT');
     }
 
+
+     
+
     try {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             method: 'POST', // Selalu POST untuk FormData
             headers,
             body: formData,
         });
+
+        const isAuthRoute = endpoint.startsWith('/auth/');
+        if (response.status === 401 && token && !isAuthRoute) {
+          window.dispatchEvent(new Event('session-expired'));
+        }
 
         const data = await response.json();
 
